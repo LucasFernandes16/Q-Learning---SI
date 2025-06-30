@@ -7,10 +7,10 @@ alpha = 0.1
 gamma = 0.95 
 epocas = 5000
 
-# --- Estratégia de Exploração (Mantendo o decaimento lento) ---
-epsilon_inicial = 0.7
+# --- Estratégia de Exploração Mantendo o decaimento lento ---
+epsilon_inicial = 1
 epsilon_final = 0.1
-taxa_decaimento = 0.9997
+taxa_decaimento = 0.9995
 
 # --- Configuração Inicial ---
 Q = np.zeros((96, 3))
@@ -63,6 +63,7 @@ for episode in range(epocas):
         estado, recompensa = get_state_reward(s, action_str)
         recompensa_original = recompensa  # Salva o valor original
         state_idx = state_to_index(estado)
+        steps += 1
         visited_states.add(state_idx)
 
         action_idx = choose_action(state_idx, epsilon)
@@ -76,8 +77,7 @@ for episode in range(epocas):
 
         # Penalidade extra por voltar à plataforma inicial (plataforma 0)
         if plataforma == 0 and steps > 1:  # penalize só se não for o primeiro passo
-            print("Voltou à plataforma inicial, penalizando...")
-            recompensa -= 500  # penalidade bem forte
+            recompensa -= 50  # penalidade bem forte
         # Ajuste da recompensa
         if recompensa == -1:
             recompensa += 100  # valor extra para vitória
@@ -93,13 +93,12 @@ for episode in range(epocas):
             done = True
             if recompensa_original == -1:
                 total_wins += 1
-
-    # --- Aqui é o final do episódio ---
+    #decaimento    
     epsilon = max(epsilon_final, epsilon * taxa_decaimento)
 
     if (episode + 1) % 100 == 0:
-        win_rate = (total_wins / 10) * 100
-        print(f"Épocas {episode-9}-{episode+1} | Taxa de vitória: {win_rate:.1f}% | Epsilon: {epsilon:.4f} | Estados visitados: {len(visited_states)}")
+        win_rate = (total_wins / 100) * 100
+        print(f"Épocas {episode-99}-{episode+1} | Taxa de vitória: {win_rate:.1f}% | Epsilon: {epsilon:.4f} | Estados visitados: {len(visited_states)}")
         total_wins = 0  # Reseta o contador de vitórias para o próximo bloco
 
 # --- Finalização ---
